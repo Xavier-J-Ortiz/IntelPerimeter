@@ -8,42 +8,17 @@ from concurrent.futures import as_completed
 
 all_systems = getSystems()
 
-#first_system = 30000001
-#last_system = 30005354
-#last_system = 30005252
-#system_segment_ends=[]
-#chunk = 100
-#amount_of_systems = last_system - first_system + 1
-#segments = int(amount_of_systems / chunk)
-#remainder = amount_of_systems % chunk
-#first_segment = first_system
-request_headers = {
-    "accept": "application/json",
-    "Accept-Language": "en",
-    "Cache-Control": "no-cache"
-}
-'''
-if segments >= 1:
-    for section in range(1, segments + 1):
-        last_segment =  first_segment + chunk
-        system_segment_ends.append(last_segment)
-        first_segment = last_segment
-if remainder != 0:
-    last_segment =  first_segment + remainder
-    system_segment_ends.append(last_segment)
-    first_segment = last_segment
-print(system_segment_ends)
-'''
-
 f= open("test.txt","w+")
 g= open("output.txt","w+")
+
 futures = []
 session = FuturesSession()
+
 for system in all_systems:
-    future = session.get('https://esi.evetech.net/latest/universe/systems/' + system + '/?datasource=tranquility&language=en', headers=request_headers)
+    future = session.get('https://esi.evetech.net/latest/universe/systems/' + system + '/?datasource=tranquility&language=en')
     futures.append(future)
-#for response in as_completed(futures):
-for response in futures:
+redo_systems = []
+for response in as_completed(futures):
     result = response.result()
     try:
         result.raise_for_status()
@@ -73,5 +48,10 @@ for response in futures:
             'system_id' : json_output['system_id'],
             'name' : json_output['name'],
             'stargates' : json_output['stargates']
+            }
+    else:
+        relevant_info = {
+            'system_id' : json_output['system_id'],
+            'name' : json_output['name'],
             }
     f.write(str(relevant_info) + "\n")
