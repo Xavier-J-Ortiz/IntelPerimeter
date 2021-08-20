@@ -11,9 +11,10 @@ f = open("test.txt","w+")
 g = open("output.txt","w+")
 
 session = FuturesSession(max_workers=200)
+systemsAndGates = {}
 
 # systemStargateCreator should pull in all 5413 k-space systems
-def systemStargateCreator(all_systems, f, g):
+def systemStargateCreator(all_systems, systemsAndGates, g):
     futures = []
     redo_systems = []
     for system in all_systems:
@@ -44,17 +45,19 @@ def systemStargateCreator(all_systems, f, g):
         json_output = json.loads(data)
         if 'stargates' in json_output:
             relevant_info = {
-                'system_id' : json_output['system_id'],
+                #'system_id' : json_output['system_id'],
                 'name' : json_output['name'],
                 'stargates' : json_output['stargates']
                 }
         else:
             relevant_info = {
-                'system_id' : json_output['system_id'],
+                #'system_id' : json_output['system_id'],
                 'name' : json_output['name'],
                 }
-        f.write(str(relevant_info) + "\n")
+#        f.write(str(relevant_info) + "\n")
+        systemsAndGates[response.system_id] = relevant_info
     if len(redo_systems) != 0:
-        systemStargateCreator(redo_systems, f, g)
+        systemStargateCreator(redo_systems, systemsAndGates, g)
+    return systemsAndGates
 
-systemStargateCreator(all_systems, f, g)
+print(len(systemStargateCreator(all_systems, systemsAndGates, g)))
