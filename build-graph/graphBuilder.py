@@ -1,20 +1,19 @@
 import json
-from os import system
 from systemPuller import getSystems
-from concurrent.futures import ThreadPoolExecutor
-import time
 from requests.exceptions import HTTPError, RequestException
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import as_completed
+
 
 all_systems = getSystems()
 
 f = open("test.txt","w+")
 g = open("output.txt","w+")
 
-session = FuturesSession()
+session = FuturesSession(max_workers=200)
 
-def systemToStargateCreator(all_systems, f, g):
+# systemStargateCreator should pull in all 5413 k-space systems
+def systemStargateCreator(all_systems, f, g):
     futures = []
     redo_systems = []
     for system in all_systems:
@@ -26,24 +25,20 @@ def systemToStargateCreator(all_systems, f, g):
         try:
             result.raise_for_status()
             ELimitRemaining = result.headers['x-esi-error-limit-remain']
-            ELimitTimeToReset = result.headers['x-esi-error-limit-reset']
-            g.write('Limit-Remain: {} Limit-Rest {} \n'.format(ELimitRemaining, ELimitTimeToReset))
+            if ELimitRemaining != "100":
+                ELimitTimeToReset = result.headers['x-esi-error-limit-reset']
+                g.write('For {} the Error Limit Remaing: {} Limit-Rest {} \n\n'.format(result.url, ELimitRemaining, ELimitTimeToReset))
         except HTTPError:
-            g.write('Received status code {} from {} \n'.format(result.status_code, result.url))
-            g.write(str(result.headers) + '\n')
+            g.write('Received status code {} from {} With headers:\n{}\n'.format(result.status_code, result.url, str(result.headers)))
             if 'x-esi-error-limit-remain' in result.headers:
                 ELimitRemaining = result.headers['x-esi-error-limit-remain']
                 ELimitTimeToReset = result.headers['x-esi-error-limit-reset']
-            #g.write("\nsleep starting in httpError\n")
-            #time.sleep(int(60))
-            #g.write("\nsleep ending in httpError\n")
+                g.write('Error Limit Remaing: {} Limit-Rest {} \n'.format(ELimitRemaining, ELimitTimeToReset))
+            g.write("\n")
             redo_systems.append(response.system_id)
             continue
         except RequestException as e: 
             g.write("other error is " + e + "\n")
-            #g.write("\nsleep starting in other exc\n")
-            #time.sleep(int(60))
-            #g.write("\nsleep ending in other exc\n")
             continue
         data = result.text
         json_output = json.loads(data)
@@ -60,6 +55,6 @@ def systemToStargateCreator(all_systems, f, g):
                 }
         f.write(str(relevant_info) + "\n")
     if len(redo_systems) != 0:
-        systemToStargateCreator(redo_systems, f, g)
+        systemStargateCreator(redo_systems, f, g)
 
-systemToStargateCreator(all_systems, f, g)
+systemStargateCreator(all_systems, f, g)
