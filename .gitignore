@@ -1,5 +1,5 @@
 .venv/
-build-graph/neighbor.p
+neighbor.p
 build-graph/test.txt
 build-graph/test.py
 build-graph/output.txt
