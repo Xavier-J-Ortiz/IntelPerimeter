@@ -1,25 +1,30 @@
-import json
+from os import system
+import re
 from systemPuller import getSystems
+import pickle
+import json
 from requests.exceptions import HTTPError, RequestException
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import as_completed
 
-
 all_systems = getSystems()
-
-f = open("test.txt","w+")
-g = open("output.txt","w+")
+systemsAndGates = pickle.load(open('stargate.p', "rb"))
+systemsAndNeighbors = systemsAndGates
+g = open("output_neighbor.txt","w+")
 
 session = FuturesSession(max_workers=200)
 
 # systemStargateCreator should pull in all 5413 k-space systems
-def systemStargateCreator(all_systems, f, g):
+def systemNeighborCreator(all_systems, systemsAndNeighbors, g):
     futures = []
     redo_systems = []
     for system in all_systems:
-        future = session.get('https://esi.evetech.net/latest/universe/systems/' + system + '/?datasource=tranquility&language=en')
-        future.system_id = system
-        futures.append(future)
+        if 'stargates' in systemsAndNeighbors[system]:
+            for gate in systemsAndNeighbors[system]['stargates']:
+                future = session.get('https://esi.evetech.net/latest/universe/stargates/' + str(gate) + '/?datasource=tranquility')
+                future.system_id = system
+                future.gate = gate
+                futures.append(future)
     for response in as_completed(futures):
         result = response.result()
         try:
@@ -42,19 +47,24 @@ def systemStargateCreator(all_systems, f, g):
             continue
         data = result.text
         json_output = json.loads(data)
-        if 'stargates' in json_output:
-            relevant_info = {
-                'system_id' : json_output['system_id'],
-                'name' : json_output['name'],
-                'stargates' : json_output['stargates']
-                }
-        else:
-            relevant_info = {
-                'system_id' : json_output['system_id'],
-                'name' : json_output['name'],
-                }
-        f.write(str(relevant_info) + "\n")
+        systemID = str(json_output['system_id'])
+        destinationSystemID = json_output['destination']['system_id']
+        destinationNameRegex = re.compile(r'\((.*)\)')
+        destinationName = destinationNameRegex.search(json_output['name']).group(1)
+        destinationInfo = {
+            'system_id': destinationSystemID,
+            'name': destinationName
+        }
+        if 'neighbors' not in systemsAndNeighbors[systemID]:
+            systemsAndNeighbors[systemID]['neighbors'] = []
+        systemsAndNeighbors[systemID]['neighbors'].append(destinationInfo)
+    print(redo_systems)
     if len(redo_systems) != 0:
-        systemStargateCreator(redo_systems, f, g)
+        systemNeighborCreator(redo_systems, systemsAndNeighbors, g)
+    return systemsAndNeighbors
 
-systemStargateCreator(all_systems, f, g)
+neighborSystem_dict = systemNeighborCreator(all_systems, systemsAndNeighbors, g)
+#print(neighborSystem_dict)
+
+len(neighborSystem_dict)
+pickle.dump(neighborSystem_dict, open('neighbor.p', "wb"))
