@@ -13,13 +13,16 @@ session = FuturesSession(max_workers=200)
 systemsAndGates = {}
 
 # systemStargateCreator should pull in all 5413 k-space systems
-def systemStargateCreator(all_systems, systemsAndGates, g):
+
+def getStargatesFutures(all_systems):
     futures = []
-    redo_systems = []
     for system in all_systems:
         future = session.get('https://esi.evetech.net/latest/universe/systems/' + system + '/?datasource=tranquility&language=en')
         future.system_id = system
-        futures.append(future)
+        futures.append(future)   
+    return futures
+
+def getStargateResults(futures, systemsAndGates, redo_systems, g):
     for response in as_completed(futures):
         result = response.result()
         try:
@@ -41,6 +44,7 @@ def systemStargateCreator(all_systems, systemsAndGates, g):
             g.write("other error is " + e + "\n")
             continue
         data = result.text
+
         json_output = json.loads(data)
         if 'stargates' in json_output:
             relevant_info = {
@@ -53,13 +57,19 @@ def systemStargateCreator(all_systems, systemsAndGates, g):
                 #'system_id' : json_output['system_id'],
                 'name' : json_output['name'],
                 }
-#        f.write(str(relevant_info) + "\n")
+
         systemsAndGates[response.system_id] = relevant_info
+    return systemsAndGates, redo_systems
+
+def getSystemStargates(all_systems, systemsAndGates, g):
+    redo_systems = []
+    futures = getStargatesFutures(all_systems)
+    systemsAndGates, redo_systems = getStargateResults(futures, systemsAndGates, redo_systems, g)
     if len(redo_systems) != 0:
-        systemStargateCreator(redo_systems, systemsAndGates, g)
+        systemsAndGates = getSystemStargates(redo_systems, systemsAndGates, g)
     return systemsAndGates
 
-solarSystem_dict = systemStargateCreator(all_systems, systemsAndGates, g)
 
+solarSystem_dict = getSystemStargates(all_systems, systemsAndGates, g)
 print(len(solarSystem_dict))
 pickle.dump(solarSystem_dict, open('stargate.p', "wb"))
