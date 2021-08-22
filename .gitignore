@@ -4,7 +4,7 @@ nodes.p
 stargate.p
 build-graph/test.txt
 build-graph/test.py
-build-graph/output.txt
+output_stargate.txt
 *.swp
 *.pyc
 output_neighbor.txt

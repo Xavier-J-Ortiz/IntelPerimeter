@@ -4,7 +4,7 @@ from systemPuller import getSystems
 systemsAndNeighbors = pickle.load(open('neighbor.p', 'rb'))
 all_systems = getSystems()
 
-def systemAndNeighborNameBuilder(all_systems, systemsAndNeighbors):
+def getNodeNames(all_systems, systemsAndNeighbors):
     universe_node_graph = {}
     for system in all_systems:
         systemName = systemsAndNeighbors[system]['name']
@@ -15,6 +15,6 @@ def systemAndNeighborNameBuilder(all_systems, systemsAndNeighbors):
             universe_node_graph[systemName] = {'neighbors': None}
     return universe_node_graph
 
-answer = systemAndNeighborNameBuilder(all_systems, systemsAndNeighbors)
-print(answer)
+answer = getNodeNames(all_systems, systemsAndNeighbors)
+#print(answer)
 pickle.dump(answer, open('nodes.p', "wb"))

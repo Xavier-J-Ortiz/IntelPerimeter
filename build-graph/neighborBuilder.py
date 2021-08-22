@@ -10,18 +10,18 @@ from concurrent.futures import as_completed
 all_systems = getSystems()
 systemsAndGates = pickle.load(open('stargate.p', "rb"))
 systemsAndNeighbors = systemsAndGates
-g = open("output_neighbor.txt","w+")
+error_write = open("output_neighbor.txt","w+")
 
 session = FuturesSession(max_workers=200)
 
 # systemStargateCreator should pull in all 5413 k-space systems
-def getSystemsNeighbors(all_systems, systemsAndNeighbors, g):
+def getSystemsNeighbors(all_systems, systemsAndNeighbors, error_write):
     redo_systems = []
     futures = getNeighborsFutures(all_systems)
-    systemsAndNeighbors, redo_systems = getNeighborsResults(futures, systemsAndNeighbors, redo_systems, g)
+    systemsAndNeighbors, redo_systems = getNeighborsResults(futures, systemsAndNeighbors, redo_systems, error_write)
     print(redo_systems)
     if len(redo_systems) != 0:
-        systemsAndNeighbors = getSystemsNeighbors(redo_systems, systemsAndNeighbors, g)
+        systemsAndNeighbors = getSystemsNeighbors(redo_systems, systemsAndNeighbors, error_write)
     return systemsAndNeighbors
 
 def getNeighborsFutures(all_systems):
@@ -35,7 +35,7 @@ def getNeighborsFutures(all_systems):
                 futures.append(future)
     return futures
 
-def getNeighborsResults(futures, systemsAndNeighbors, redo_systems, g):
+def getNeighborsResults(futures, systemsAndNeighbors, redo_systems, error_write):
     for response in as_completed(futures):
         result = response.result()
         try:
@@ -43,18 +43,18 @@ def getNeighborsResults(futures, systemsAndNeighbors, redo_systems, g):
             ELimitRemaining = result.headers['x-esi-error-limit-remain']
             if ELimitRemaining != "100":
                 ELimitTimeToReset = result.headers['x-esi-error-limit-reset']
-                g.write('For {} the Error Limit Remaing: {} Limit-Rest {} \n\n'.format(result.url, ELimitRemaining, ELimitTimeToReset))
+                error_write.write('For {} the Error Limit Remaing: {} Limit-Rest {} \n\n'.format(result.url, ELimitRemaining, ELimitTimeToReset))
         except HTTPError:
-            g.write('Received status code {} from {} With headers:\n{}\n'.format(result.status_code, result.url, str(result.headers)))
+            error_write.write('Received status code {} from {} With headers:\n{}\n'.format(result.status_code, result.url, str(result.headers)))
             if 'x-esi-error-limit-remain' in result.headers:
                 ELimitRemaining = result.headers['x-esi-error-limit-remain']
                 ELimitTimeToReset = result.headers['x-esi-error-limit-reset']
-                g.write('Error Limit Remaing: {} Limit-Rest {} \n'.format(ELimitRemaining, ELimitTimeToReset))
-            g.write("\n")
+                error_write.write('Error Limit Remaing: {} Limit-Rest {} \n'.format(ELimitRemaining, ELimitTimeToReset))
+            error_write.write("\n")
             redo_systems.append(response.system_id)
             continue
         except RequestException as e: 
-            g.write("other error is " + e + "\n")
+            error_write.write("other error is " + e + "\n")
             continue
         data = result.text
         json_output = json.loads(data)
@@ -72,9 +72,9 @@ def getNeighborsResults(futures, systemsAndNeighbors, redo_systems, g):
     return systemsAndNeighbors, redo_systems
 
 
-neighborSystem_dict = getSystemsNeighbors(all_systems, systemsAndNeighbors, g)
+neighborSystem_dict = getSystemsNeighbors(all_systems, systemsAndNeighbors, error_write)
 
-print(neighborSystem_dict)
+#print(neighborSystem_dict)
 print(len(neighborSystem_dict))
 
 pickle.dump(neighborSystem_dict, open('neighbor.p', "wb"))

@@ -7,7 +7,7 @@ import pickle
 
 all_systems = getSystems()
 
-g = open("output.txt","w+")
+error_write = open("output_stargate.txt","w+")
 
 session = FuturesSession(max_workers=200)
 systemsAndGates = {}
@@ -22,7 +22,7 @@ def getStargatesFutures(all_systems):
         futures.append(future)   
     return futures
 
-def getStargateResults(futures, systemsAndGates, redo_systems, g):
+def getStargateResults(futures, systemsAndGates, redo_systems, error_write):
     for response in as_completed(futures):
         result = response.result()
         try:
@@ -30,18 +30,18 @@ def getStargateResults(futures, systemsAndGates, redo_systems, g):
             ELimitRemaining = result.headers['x-esi-error-limit-remain']
             if ELimitRemaining != "100":
                 ELimitTimeToReset = result.headers['x-esi-error-limit-reset']
-                g.write('For {} the Error Limit Remaing: {} Limit-Rest {} \n\n'.format(result.url, ELimitRemaining, ELimitTimeToReset))
+                error_write.write('For {} the Error Limit Remaing: {} Limit-Rest {} \n\n'.format(result.url, ELimitRemaining, ELimitTimeToReset))
         except HTTPError:
-            g.write('Received status code {} from {} With headers:\n{}\n'.format(result.status_code, result.url, str(result.headers)))
+            error_write.write('Received status code {} from {} With headers:\n{}\n'.format(result.status_code, result.url, str(result.headers)))
             if 'x-esi-error-limit-remain' in result.headers:
                 ELimitRemaining = result.headers['x-esi-error-limit-remain']
                 ELimitTimeToReset = result.headers['x-esi-error-limit-reset']
-                g.write('Error Limit Remaing: {} Limit-Rest {} \n'.format(ELimitRemaining, ELimitTimeToReset))
-            g.write("\n")
+                error_write.write('Error Limit Remaing: {} Limit-Rest {} \n'.format(ELimitRemaining, ELimitTimeToReset))
+            error_write.write("\n")
             redo_systems.append(response.system_id)
             continue
         except RequestException as e: 
-            g.write("other error is " + e + "\n")
+            error_write.write("other error is " + e + "\n")
             continue
         data = result.text
 
@@ -61,15 +61,15 @@ def getStargateResults(futures, systemsAndGates, redo_systems, g):
         systemsAndGates[response.system_id] = relevant_info
     return systemsAndGates, redo_systems
 
-def getSystemStargates(all_systems, systemsAndGates, g):
+def getSystemStargates(all_systems, systemsAndGates, error_write):
     redo_systems = []
     futures = getStargatesFutures(all_systems)
-    systemsAndGates, redo_systems = getStargateResults(futures, systemsAndGates, redo_systems, g)
+    systemsAndGates, redo_systems = getStargateResults(futures, systemsAndGates, redo_systems, error_write)
     if len(redo_systems) != 0:
-        systemsAndGates = getSystemStargates(redo_systems, systemsAndGates, g)
+        systemsAndGates = getSystemStargates(redo_systems, systemsAndGates, error_write)
     return systemsAndGates
 
 
-solarSystem_dict = getSystemStargates(all_systems, systemsAndGates, g)
+solarSystem_dict = getSystemStargates(all_systems, systemsAndGates, error_write)
 print(len(solarSystem_dict))
 pickle.dump(solarSystem_dict, open('stargate.p', "wb"))
