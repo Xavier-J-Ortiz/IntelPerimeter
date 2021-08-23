@@ -1,5 +1,6 @@
 .venv/
 neighbor.p
+perimeter.p
 nodes.p
 stargate.p
 build-graph/test.txt
