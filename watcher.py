@@ -40,18 +40,18 @@ if __name__ == "__main__":
     my_event_handler = RegexMatchingEventHandler(regexes,ignore_regexes,ignore_directories,case_sensitive)
 
     def on_modified(event):
-        print(f"hey buddy, \'{event.src_path}\' has been modified")
+        #print(f"hey buddy, \'{event.src_path}\' has been modified")
         with open(event.src_path, 'r', encoding='utf-16') as changed_log:
             last_line = changed_log.readlines()[-1]
             analyze = last_line.replace('\n',' ').split(" ")
             analyze_lowercase = [entry.lower() for entry in analyze]
+            print(last_line)
             for system in perimeter:
                 #print(system)
                 if system.lower() in analyze_lowercase:
                     print(f'\n-----\nDANGER: {system} : {perimeter[system]} jumps\n-----\n' ) 
                     alarm = vlc.MediaPlayer('alarms/alarm2.mp3')
                     alarm.play()
-            print(last_line)
 
     
     my_event_handler.on_modified = on_modified
