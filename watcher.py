@@ -45,11 +45,10 @@ if __name__ == "__main__":
             last_line = changed_log.readlines()[-1]
             analyze = last_line.replace('\n',' ').split(" ")
             analyze_lowercase = [entry.lower() for entry in analyze]
-            print(analyze_lowercase)
             for system in perimeter:
                 #print(system)
                 if system.lower() in analyze_lowercase:
-                    print(f'DANGER: {system} : {perimeter[system]} jumps' ) 
+                    print(f'\n-----\nDANGER: {system} : {perimeter[system]} jumps\n-----\n' ) 
                     alarm = vlc.MediaPlayer('alarms/alarm2.mp3')
                     alarm.play()
             print(last_line)
