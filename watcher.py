@@ -38,7 +38,11 @@ if __name__ == "__main__":
     print (regexes)
 
     def on_modified(event):
-        print(f"hey buddy, {event.src_path} has been modified")
+        print(f"hey buddy, \'{event.src_path}\' has been modified")
+        with open(event.src_path, 'r', encoding='utf-16') as changed_log:
+            last_line = changed_log.readlines()[-1]
+            print(last_line)
+
     
     my_event_handler.on_modified = on_modified
 
