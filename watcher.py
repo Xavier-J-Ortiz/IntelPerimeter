@@ -19,7 +19,7 @@ if __name__ == "__main__":
     regexes = []
     for channel in channel_names:
         regex = '^' + file_path + channel + '_' + year + month + day + '.*'
-        regexes.append()
+        regexes.append(regex)
     ignore_regexes= []
     ignore_directories = False
     case_sensitive = True
