@@ -18,6 +18,6 @@ def delimitPerimeter(Perimeter, neighbors, node_graph, jumps):
         neighbors = new_neighbors
     return Perimeter
 
-perimeter_dict = createPerimeter('1DQ1-A', node_graph, 3)
+perimeter_dict = createPerimeter('K-6K16', node_graph, 3)
 print(perimeter_dict)
-pickle.dump(perimeter_dict, open('perimeter.p', 'wb')
+pickle.dump(perimeter_dict, open('perimeter.p', 'wb'))
