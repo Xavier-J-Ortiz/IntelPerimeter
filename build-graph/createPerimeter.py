@@ -1,6 +1,5 @@
 import pickle
 
-node_graph = pickle.load(open('nodes.p', 'rb'))
 
 def createPerimeter(systemName, node_graph, jumps =5):
     Perimeter = {systemName: 0}
@@ -16,8 +15,10 @@ def delimitPerimeter(Perimeter, neighbors, node_graph, jumps):
                 Perimeter[neighbor] = distance
                 new_neighbors += node_graph[neighbor]['neighbors']
         neighbors = new_neighbors
+    pickle.dump(Perimeter, open('perimeter.p', 'wb'))
     return Perimeter
 
+node_graph = pickle.load(open('nodes.p', 'rb'))
 perimeter_dict = createPerimeter('K-6K16', node_graph, 3)
 print(perimeter_dict)
-pickle.dump(perimeter_dict, open('perimeter.p', 'wb'))
+#pickle.dump(perimeter_dict, open('perimeter.p', 'wb'))

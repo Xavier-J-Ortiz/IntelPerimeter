@@ -1,30 +1,29 @@
-from os import system
+import os
 import re
-from systemPuller import getSystems
 import pickle
 import json
+from systemPuller import getSystems
+from stargateBuilder import getSystemStargates
 from requests.exceptions import HTTPError, RequestException
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import as_completed
 
-all_systems = getSystems()
-systemsAndGates = pickle.load(open('stargate.p', "rb"))
-systemsAndNeighbors = systemsAndGates
-error_write = open("output_neighbor.txt","w+")
-
 session = FuturesSession(max_workers=200)
 
-# systemStargateCreator should pull in all 5413 k-space systems
 def getSystemsNeighbors(all_systems, systemsAndNeighbors, error_write):
+    if os.path.isfile('neighbor.p'):
+        print('neighbor.p already exists')
+        return pickle.load(open('neighbor.p', "rb"))
     redo_systems = []
-    futures = getNeighborsFutures(all_systems)
+    futures = getNeighborsFutures(all_systems, systemsAndNeighbors)
     systemsAndNeighbors, redo_systems = getNeighborsResults(futures, systemsAndNeighbors, redo_systems, error_write)
     print(redo_systems)
     if len(redo_systems) != 0:
         systemsAndNeighbors = getSystemsNeighbors(redo_systems, systemsAndNeighbors, error_write)
+    pickle.dump(systemsAndNeighbors, open('neighbor.p', "wb"))
     return systemsAndNeighbors
 
-def getNeighborsFutures(all_systems):
+def getNeighborsFutures(all_systems, systemsAndNeighbors):
     futures = []
     for system in all_systems:
         if 'stargates' in systemsAndNeighbors[system]:
@@ -72,9 +71,6 @@ def getNeighborsResults(futures, systemsAndNeighbors, redo_systems, error_write)
     return systemsAndNeighbors, redo_systems
 
 
-neighborSystem_dict = getSystemsNeighbors(all_systems, systemsAndNeighbors, error_write)
-
-#print(neighborSystem_dict)
-print(len(neighborSystem_dict))
-
-pickle.dump(neighborSystem_dict, open('neighbor.p', "wb"))
+#neighborSystem_dict = getSystemsNeighbors(all_systems, systemsAndNeighbors, error_write)
+#print(len(neighborSystem_dict))
+#pickle.dump(neighborSystem_dict, open('neighbor.p', "wb"))

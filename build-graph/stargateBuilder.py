@@ -1,18 +1,16 @@
 import json
+import pickle
+import os
 from systemPuller import getSystems
 from requests.exceptions import HTTPError, RequestException
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import as_completed
-import pickle
 
-all_systems = getSystems()
-
-error_write = open("output_stargate.txt","w+")
+#all_systems = getSystems()
+#error_write = open("output_stargate.txt","w+")
+#systemsAndGates = {}
 
 session = FuturesSession(max_workers=200)
-systemsAndGates = {}
-
-# systemStargateCreator should pull in all 5413 k-space systems
 
 def getStargatesFutures(all_systems):
     futures = []
@@ -57,19 +55,20 @@ def getStargateResults(futures, systemsAndGates, redo_systems, error_write):
                 #'system_id' : json_output['system_id'],
                 'name' : json_output['name'],
                 }
-
         systemsAndGates[response.system_id] = relevant_info
     return systemsAndGates, redo_systems
 
 def getSystemStargates(all_systems, systemsAndGates, error_write):
+    if os.path.isfile('stargate.p'):
+        print('stargates.p already exists')
+        return pickle.load(open('stargate.p', "rb"))
     redo_systems = []
     futures = getStargatesFutures(all_systems)
     systemsAndGates, redo_systems = getStargateResults(futures, systemsAndGates, redo_systems, error_write)
     if len(redo_systems) != 0:
         systemsAndGates = getSystemStargates(redo_systems, systemsAndGates, error_write)
+    pickle.dump(systemsAndGates, open('stargate.p', "wb"))
     return systemsAndGates
-
-
-solarSystem_dict = getSystemStargates(all_systems, systemsAndGates, error_write)
-print(len(solarSystem_dict))
-pickle.dump(solarSystem_dict, open('stargate.p', "wb"))
+#solarSystem_dict = getSystemStargates(all_systems, systemsAndGates, error_write)
+#print(len(solarSystem_dict))
+#pickle.dump(solarSystem_dict, open('stargate.p', "wb"))
