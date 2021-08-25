@@ -1,4 +1,5 @@
 import pickle
+import vlc
 import os
 import re
 import time
@@ -41,6 +42,8 @@ if __name__ == "__main__":
         print(f"hey buddy, \'{event.src_path}\' has been modified")
         with open(event.src_path, 'r', encoding='utf-16') as changed_log:
             last_line = changed_log.readlines()[-1]
+            #alarm = vlc.MediaPlayer('alarms/alarm2.mp3')
+            #alarm.play()
             print(last_line)
 
     
