@@ -1,14 +1,12 @@
-import pickle
-import vlc
-import time
-import datetime
+import pickle, vlc, time, datetime
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
 from termcolor import colored
 
-perimeter = pickle.load(open('build-graph/perimeter.p', 'rb'))
-
+perimeter = pickle.load(open('build_graph/perimeter.p', 'rb'))
+# should be input by user
 file_path = '/home/xortiz/Documents/EVE/logs/Chatlogs/'
+# should be input by user
 channel_names = ['delve\.imperium', 'Fleet']
 
 date = datetime.datetime.utcnow()

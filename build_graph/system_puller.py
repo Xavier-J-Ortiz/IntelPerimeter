@@ -1,9 +1,6 @@
-import os
-import re
-import requests
-import pickle
+import os, re, requests, pickle
 
-def getSystems():
+def get_systems():
     if os.path.isfile('systems.p'):
         print('systems.p already exist')
         return pickle.load(open('systems.p', 'rb'))

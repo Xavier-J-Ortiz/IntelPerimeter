@@ -1,8 +1,7 @@
-import pickle
-import os
-from stargateBuilder import getSystemStargates
-from neighborBuilder import getSystemsNeighbors
-from systemPuller import getSystems
+import pickle, os
+from stargate_builder import get_system_stargates
+from neighbor_builder import get_systems_neighbors
+from system_puller import get_systems
 
 def getNodeNames(all_systems, systemsAndNeighbors):
     if os.path.isfile('nodes.p'):
@@ -19,11 +18,11 @@ def getNodeNames(all_systems, systemsAndNeighbors):
     pickle.dump(universe_node_graph, open('nodes.p', "wb"))
     return universe_node_graph
 
-all_systems = getSystems()
+all_systems = get_systems()
 error_write_neighbor = open("output_neighbor.txt","w+")
 error_write_stargate = open("output_stargate.txt","w+")
 systemsAndGates = {}
-systemsAndGates = getSystemStargates(all_systems, systemsAndGates, error_write_stargate)
-systemsAndNeighbors = getSystemsNeighbors(all_systems, systemsAndGates, error_write_neighbor)
+systemsAndGates = get_system_stargates(all_systems, systemsAndGates, error_write_stargate)
+systemsAndNeighbors = get_systems_neighbors(all_systems, systemsAndGates, error_write_neighbor)
 nodes = getNodeNames(all_systems, systemsAndNeighbors)
 #print(nodes)
