@@ -1,11 +1,11 @@
 .venv/
 neighbor.p
+systems.p
 perimeter.p
 nodes.p
 stargate.p
 build-graph/test.txt
-build-graph/test.py
 output_stargate.txt
+output_neighbor.txt
 *.swp
 *.pyc
-output_neighbor.txt

@@ -1,13 +1,12 @@
-import pickle
-import vlc
-import time
-import datetime
+import pickle, vlc, time, datetime
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
+from termcolor import colored
 
-perimeter = pickle.load(open('build-graph/perimeter.p', 'rb'))
-
+perimeter = pickle.load(open('build_graph/perimeter.p', 'rb'))
+# should be input by user
 file_path = '/home/xortiz/Documents/EVE/logs/Chatlogs/'
+# should be input by user
 channel_names = ['delve\.imperium', 'Fleet']
 
 date = datetime.datetime.utcnow()
@@ -30,10 +29,15 @@ if __name__ == "__main__":
             last_line = changed_log.readlines()[-1]
             analyze = last_line.replace('\n',' ').split(" ")
             analyze_lowercase = [entry.lower() for entry in analyze]
+            zero_system = ''
+            for system in perimeter:
+                if perimeter[system] == 0:
+                    zero_system = system
+            #print(zero_system)
             print(last_line)
             for system in perimeter:
                 if system.lower() in analyze_lowercase:
-                    print(f'\n-----\nDANGER: {system} : {perimeter[system]} jumps\n-----\n' ) 
+                    print(colored(f'\n-----\nDANGER: {system} : {perimeter[system]} jumps out from {zero_system}\n-----\n', 'red')) 
                     alarm = vlc.MediaPlayer('alarms/alarm2.mp3')
                     alarm.play()
 
