@@ -34,7 +34,7 @@ def get_neighbors_results(futures, systems_and_neighbors, redo_systems, error_wr
             error_write.write("\n")
             redo_systems.append(response.system_id)
             continue
-        except RequestException as e: 
+        except RequestException as e:
             error_write.write("other error is " + e + "\n")
             continue
         data = result.text
