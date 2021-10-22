@@ -3,11 +3,12 @@ from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
 from termcolor import colored
 
+# should be input by user
+file_path = '/home/xortiz/Games/eve-online/drive_c/users/xortiz/Documents/EVE/logs/Chatlogs/'
+# should be input by user
+channel_names = ['delve\.imperium', 'Fleet', 'querious\.imperium']
+#should be built by user
 perimeter = pickle.load(open('build_graph/perimeter.p', 'rb'))
-# should be input by user
-file_path = '/home/xortiz/Documents/EVE/logs/Chatlogs/'
-# should be input by user
-channel_names = ['delve\.imperium', 'Fleet']
 
 date = datetime.datetime.utcnow()
 year = date.strftime("%Y")
