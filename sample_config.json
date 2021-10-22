@@ -1,0 +1,10 @@
+{
+    "chatlog_path": "~/Documents/EVE/logs/Chatlogs/",
+    "jumps": 3,
+    "central_system": "C3N-3S",
+    "channel_names": [
+        "delve.imperium",
+        "Fleet", 
+        "querious.imperium"
+    ]
+}

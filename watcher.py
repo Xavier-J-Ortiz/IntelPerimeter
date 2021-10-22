@@ -1,18 +1,15 @@
-import vlc, time, datetime
+import vlc, time, datetime, json,os
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
 from termcolor import colored
 from build_graph.create_perimeter import create_perimeter
 from build_graph.node_graph_builder import build_graph
 
+config = json.load(open('./config.json',))
 node_graph = build_graph()
-# Central system should be input by user
-perimeter = create_perimeter('K-6K16', node_graph, 3)
-# should be input by user
-file_path = '/home/xortiz/Games/eve-online/drive_c/users/xortiz/Documents/EVE/logs/Chatlogs/'
-# should be input by user
-channel_names = ['delve\.imperium', 'Fleet', 'querious\.imperium']
-#should be built by user
+perimeter = create_perimeter(config['central_system'], node_graph, config['jumps'])
+file_path = os.path.expanduser(config['chatlog_path'])
+channel_names = config['channel_names']
 
 date = datetime.datetime.utcnow()
 year = date.strftime("%Y")
@@ -54,6 +51,7 @@ if __name__ == "__main__":
     my_observer.schedule
 
     my_observer.start()
+    print("watcher.py is running")
     try:
         while True:
             time.sleep(1)
