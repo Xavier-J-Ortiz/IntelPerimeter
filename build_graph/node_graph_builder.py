@@ -9,11 +9,14 @@ def build_graph():
         return pickle.load(open('./data/nodes.p', "rb"))
     else:
         all_systems = get_systems()
+        print("systems loaded from scratch")
         error_write_neighbor = open("output_neighbor.txt","w+")
         error_write_stargate = open("output_stargate.txt","w+")
         systemsAndGates = {}
         systemsAndGates = get_system_stargates(all_systems, systemsAndGates, error_write_stargate)
+        print("systems and their gates information loaded from scratch")
         systemsAndNeighbors = get_systems_neighbors(all_systems, systemsAndGates, error_write_neighbor)
+        print("systems and their neighbor information loaded from scratch")
 
     universe_node_graph = {}
     for system in all_systems:

@@ -1,4 +1,4 @@
-import json, pickle, os
+import json
 from requests.exceptions import HTTPError, RequestException
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import as_completed
@@ -50,14 +50,9 @@ def get_stargate_results(futures, systems_and_gates, redo_systems, error_write):
     return systems_and_gates, redo_systems
 
 def get_system_stargates(all_systems, systems_and_gates, error_write):
-    if os.path.isfile('./data/stargate.p'):
-        print('stargates.p already exists')
-        return pickle.load(open('./data/stargate.p', "rb"))
     redo_systems = []
     futures = get_stargates_futures(all_systems)
     systems_and_gates, redo_systems = get_stargate_results(futures, systems_and_gates, redo_systems, error_write)
     if len(redo_systems) != 0:
         systems_and_gates = get_system_stargates(redo_systems, systems_and_gates, error_write)
-    print("systems and their gates information loaded from scratch")
-    pickle.dump(systems_and_gates, open('./data/stargate.p', "wb"))
     return systems_and_gates

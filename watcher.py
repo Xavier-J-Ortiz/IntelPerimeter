@@ -1,4 +1,4 @@
-import vlc, time, datetime, os
+import vlc, time, datetime
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
 from termcolor import colored

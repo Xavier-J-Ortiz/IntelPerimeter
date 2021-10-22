@@ -1,4 +1,4 @@
-import os, re, pickle, json
+import re, json
 from requests.exceptions import HTTPError, RequestException
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import as_completed
@@ -53,15 +53,9 @@ def get_neighbors_results(futures, systems_and_neighbors, redo_systems, error_wr
     return systems_and_neighbors, redo_systems
 
 def get_systems_neighbors(all_systems, systems_and_neighbors, error_write):
-    if os.path.isfile('./data/neighbor.p'):
-        print('neighbor.p already exists')
-        return pickle.load(open('./data/neighbor.p', "rb"))
     redo_systems = []
     futures = get_neighbors_futures(all_systems, systems_and_neighbors)
     systems_and_neighbors, redo_systems = get_neighbors_results(futures, systems_and_neighbors, redo_systems, error_write)
-    #print(redo_systems)
     if len(redo_systems) != 0:
         systems_and_neighbors = get_systems_neighbors(redo_systems, systems_and_neighbors, error_write)
-    print("systems and their neighbor information loaded from scratch")
-    pickle.dump(systems_and_neighbors, open('./data/neighbor.p', "wb"))
     return systems_and_neighbors
