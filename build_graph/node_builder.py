@@ -14,5 +14,3 @@ def get_node_names(all_systems, systemsAndNeighbors):
             universe_node_graph[systemName] = {'neighbors': None}
     pickle.dump(universe_node_graph, open('./data/nodes.p', "wb"))
     return universe_node_graph
-
-#print(nodes)

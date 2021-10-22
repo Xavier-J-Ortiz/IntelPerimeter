@@ -3,10 +3,6 @@ from requests.exceptions import HTTPError, RequestException
 from requests_futures.sessions import FuturesSession
 from concurrent.futures import as_completed
 
-#all_systems = getSystems()
-#error_write = open("output_stargate.txt","w+")
-#systems_and_gates = {}
-
 session = FuturesSession(max_workers=200)
 
 def get_stargates_futures(all_systems):
@@ -25,7 +21,7 @@ def get_stargate_results(futures, systems_and_gates, redo_systems, error_write):
             error_limit_remaining = result.headers['x-esi-error-limit-remain']
             if error_limit_remaining != "100":
                 error_limit_time_to_reset = result.headers['x-esi-error-limit-reset']
-                error_write.write('For {} the Error Limit Remaing: {} Limit-Rest {} \n\n'.format(result.url, error_limit_remaining, error_limit_time_to_reset))
+                error_write.write('INFORMATIONAL: Though no error, for {} the Error Limit Remaning: {} Limit-Rest {} \n\n'.format(result.url, error_limit_remaining, error_limit_time_to_reset))
         except HTTPError:
             error_write.write('Received status code {} from {} With headers:\n{}\n'.format(result.status_code, result.url, str(result.headers)))
             if 'x-esi-error-limit-remain' in result.headers:
@@ -43,13 +39,11 @@ def get_stargate_results(futures, systems_and_gates, redo_systems, error_write):
         json_output = json.loads(data)
         if 'stargates' in json_output:
             relevant_info = {
-                #'system_id' : json_output['system_id'],
                 'name' : json_output['name'],
                 'stargates' : json_output['stargates']
                 }
         else:
             relevant_info = {
-                #'system_id' : json_output['system_id'],
                 'name' : json_output['name'],
                 }
         systems_and_gates[response.system_id] = relevant_info
@@ -66,6 +60,3 @@ def get_system_stargates(all_systems, systems_and_gates, error_write):
         systems_and_gates = get_system_stargates(redo_systems, systems_and_gates, error_write)
     pickle.dump(systems_and_gates, open('./data/stargate.p', "wb"))
     return systems_and_gates
-#solarSystem_dict = getSystemStargates(all_systems, systems_and_gates, error_write)
-#print(len(solarSystem_dict))
-#pickle.dump(solarSystem_dict, open('stargate.p', "wb"))

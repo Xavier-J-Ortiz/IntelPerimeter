@@ -17,8 +17,8 @@ systemsAndGates = get_system_stargates(all_systems, systemsAndGates, error_write
 systemsAndNeighbors = get_systems_neighbors(all_systems, systemsAndGates, error_write_neighbor)
 nodes = get_node_names(all_systems, systemsAndNeighbors)
 node_graph = pickle.load(open('./data/nodes.p', 'rb'))
+# Central system should be input by user
 perimeter_dict = create_perimeter('K-6K16', node_graph, 3)
-print(perimeter_dict)
 
 # should be input by user
 file_path = '/home/xortiz/Games/eve-online/drive_c/users/xortiz/Documents/EVE/logs/Chatlogs/'

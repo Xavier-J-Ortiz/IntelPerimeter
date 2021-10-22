@@ -5,19 +5,6 @@ from concurrent.futures import as_completed
 
 session = FuturesSession(max_workers=200)
 
-def get_systems_neighbors(all_systems, systems_and_neighbors, error_write):
-    if os.path.isfile('./data/neighbor.p'):
-        print('neighbor.p already exists')
-        return pickle.load(open('./data/neighbor.p', "rb"))
-    redo_systems = []
-    futures = get_neighbors_futures(all_systems, systems_and_neighbors)
-    systems_and_neighbors, redo_systems = get_neighbors_results(futures, systems_and_neighbors, redo_systems, error_write)
-    print(redo_systems)
-    if len(redo_systems) != 0:
-        systems_and_neighbors = get_systems_neighbors(redo_systems, systems_and_neighbors, error_write)
-    pickle.dump(systems_and_neighbors, open('./data/neighbor.p', "wb"))
-    return systems_and_neighbors
-
 def get_neighbors_futures(all_systems, systems_and_neighbors):
     futures = []
     for system in all_systems:
@@ -55,17 +42,25 @@ def get_neighbors_results(futures, systems_and_neighbors, redo_systems, error_wr
         system_id = str(json_output['system_id'])
         destination_system_id = json_output['destination']['system_id']
         destination_name_regex = re.compile(r'\((.*)\)')
-        ddestination_name = destination_name_regex.search(json_output['name']).group(1)
+        destination_name = destination_name_regex.search(json_output['name']).group(1)
         destination_info = {
             'system_id': destination_system_id,
-            'name': ddestination_name
+            'name': destination_name
         }
         if 'neighbors' not in systems_and_neighbors[system_id]:
             systems_and_neighbors[system_id]['neighbors'] = []
         systems_and_neighbors[system_id]['neighbors'].append(destination_info)
     return systems_and_neighbors, redo_systems
 
-
-#neighborSystem_dict = get_systems__nighbors(all_systems, systems_and_neighbors, error_write)
-#print(len(neighborSystem_dict))
-#pickle.dump(neighborSystem_dict, open('neighbor.p', "wb"))
+def get_systems_neighbors(all_systems, systems_and_neighbors, error_write):
+    if os.path.isfile('./data/neighbor.p'):
+        print('neighbor.p already exists')
+        return pickle.load(open('./data/neighbor.p', "rb"))
+    redo_systems = []
+    futures = get_neighbors_futures(all_systems, systems_and_neighbors)
+    systems_and_neighbors, redo_systems = get_neighbors_results(futures, systems_and_neighbors, redo_systems, error_write)
+    print(redo_systems)
+    if len(redo_systems) != 0:
+        systems_and_neighbors = get_systems_neighbors(redo_systems, systems_and_neighbors, error_write)
+    pickle.dump(systems_and_neighbors, open('./data/neighbor.p', "wb"))
+    return systems_and_neighbors
