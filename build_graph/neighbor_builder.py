@@ -59,8 +59,9 @@ def get_systems_neighbors(all_systems, systems_and_neighbors, error_write):
     redo_systems = []
     futures = get_neighbors_futures(all_systems, systems_and_neighbors)
     systems_and_neighbors, redo_systems = get_neighbors_results(futures, systems_and_neighbors, redo_systems, error_write)
-    print(redo_systems)
+    #print(redo_systems)
     if len(redo_systems) != 0:
         systems_and_neighbors = get_systems_neighbors(redo_systems, systems_and_neighbors, error_write)
+    print("systems and their neighbor information loaded from scratch")
     pickle.dump(systems_and_neighbors, open('./data/neighbor.p', "wb"))
     return systems_and_neighbors

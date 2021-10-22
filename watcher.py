@@ -1,31 +1,18 @@
-from build_graph.system_puller import get_systems
-import pickle, vlc, time, datetime
+import vlc, time, datetime, os
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
 from termcolor import colored
-from build_graph.system_puller import get_systems
-from build_graph.stargate_builder import get_system_stargates
-from build_graph.neighbor_builder import get_systems_neighbors
-from build_graph.node_builder import get_node_names
 from build_graph.create_perimeter import create_perimeter
+from build_graph.node_graph_builder import build_graph
 
-all_systems = get_systems()
-error_write_neighbor = open("output_neighbor.txt","w+")
-error_write_stargate = open("output_stargate.txt","w+")
-systemsAndGates = {}
-systemsAndGates = get_system_stargates(all_systems, systemsAndGates, error_write_stargate)
-systemsAndNeighbors = get_systems_neighbors(all_systems, systemsAndGates, error_write_neighbor)
-nodes = get_node_names(all_systems, systemsAndNeighbors)
-node_graph = pickle.load(open('./data/nodes.p', 'rb'))
+node_graph = build_graph()
 # Central system should be input by user
-perimeter_dict = create_perimeter('K-6K16', node_graph, 3)
-
+perimeter = create_perimeter('K-6K16', node_graph, 3)
 # should be input by user
 file_path = '/home/xortiz/Games/eve-online/drive_c/users/xortiz/Documents/EVE/logs/Chatlogs/'
 # should be input by user
 channel_names = ['delve\.imperium', 'Fleet', 'querious\.imperium']
 #should be built by user
-perimeter = pickle.load(open('data/perimeter.p', 'rb'))
 
 date = datetime.datetime.utcnow()
 year = date.strftime("%Y")
@@ -51,7 +38,6 @@ if __name__ == "__main__":
             for system in perimeter:
                 if perimeter[system] == 0:
                     zero_system = system
-            #print(zero_system)
             print(last_line)
             for system in perimeter:
                 if system.lower() in analyze_lowercase:
@@ -74,4 +60,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         my_observer.stop()
         my_observer.join()
-
