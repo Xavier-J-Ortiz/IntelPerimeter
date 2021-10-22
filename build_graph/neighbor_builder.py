@@ -6,16 +6,16 @@ from concurrent.futures import as_completed
 session = FuturesSession(max_workers=200)
 
 def get_systems_neighbors(all_systems, systems_and_neighbors, error_write):
-    if os.path.isfile('neighbor.p'):
+    if os.path.isfile('./data/neighbor.p'):
         print('neighbor.p already exists')
-        return pickle.load(open('neighbor.p', "rb"))
+        return pickle.load(open('./data/neighbor.p', "rb"))
     redo_systems = []
     futures = get_neighbors_futures(all_systems, systems_and_neighbors)
     systems_and_neighbors, redo_systems = get_neighbors_results(futures, systems_and_neighbors, redo_systems, error_write)
     print(redo_systems)
     if len(redo_systems) != 0:
         systems_and_neighbors = get_systems_neighbors(redo_systems, systems_and_neighbors, error_write)
-    pickle.dump(systems_and_neighbors, open('neighbor.p', "wb"))
+    pickle.dump(systems_and_neighbors, open('./data/neighbor.p', "wb"))
     return systems_and_neighbors
 
 def get_neighbors_futures(all_systems, systems_and_neighbors):
