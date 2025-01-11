@@ -9,3 +9,4 @@ output_stargate.txt
 output_neighbor.txt
 *.swp
 *.pyc
+config.json
